@@ -12,9 +12,8 @@ import DA.Bazel.Runfiles
 import DA.Daml.LF.Proto3.Archive (decodeArchivePackageId)
 import DA.Daml.LF.Reader(DalfManifest(..), Dalfs(..), readDalfs, readDalfManifest)
 import DA.Ledger as Ledger
-import DA.Ledger.Sandbox (Sandbox,SandboxSpec(..),startSandbox,shutdownSandbox,withSandbox)
-import DA.Ledger.Sandbox as Sandbox
-import Data.List (elem,isPrefixOf,isInfixOf,(\\))
+import DA.Ledger.Sandbox (AuthSpec(..),Sandbox(..),SandboxSpec(..),startSandbox,shutdownSandbox,withSandbox)
+import Data.List (isPrefixOf,isInfixOf,(\\))
 import Prelude hiding(Enum)
 import System.Environment.Blank (setEnv)
 import System.FilePath

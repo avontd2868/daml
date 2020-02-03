@@ -6,6 +6,7 @@ module Options (
     parseOptions,
   ) where
 
+import           Control.Monad.Logger
 import           Data.Monoid ((<>))
 import           Options.Applicative
 
