@@ -33,6 +33,7 @@ final case class SandboxConfig(
     eagerPackageLoading: Boolean,
     logLevel: Level,
     authService: Option[AuthService],
+    useRandomCid: Boolean
 )
 
 object SandboxConfig {
@@ -57,5 +58,6 @@ object SandboxConfig {
       eagerPackageLoading = false,
       logLevel = Level.INFO,
       authService = None,
+      useRandomCid = false
     )
 }
