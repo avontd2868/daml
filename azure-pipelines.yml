@@ -21,6 +21,7 @@ pr:
 
 jobs:
   - job: git_sha
+    condition: false
     pool:
       name: 'linux-pool'
     steps:
@@ -38,7 +39,7 @@ jobs:
         name: out
 
   - job: check_standard_change_label
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: false #eq(variables['Build.Reason'], 'PullRequest')
     pool:
       name: 'linux-pool'
     steps:
@@ -61,7 +62,7 @@ jobs:
           PR: $(System.PullRequest.PullRequestNumber)
 
   - job: check_changelog_entry
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: false #eq(variables['Build.Reason'], 'PullRequest')
     pool:
       name: 'linux-pool'
     steps:
@@ -71,7 +72,7 @@ jobs:
   - job: Linux
     timeoutInMinutes: 360
     pool:
-      name: 'linux-pool'
+      name: 'garys-linux-pool'
     steps:
       - template: ci/report-start.yml
       - checkout: self
@@ -82,6 +83,7 @@ jobs:
       - template: ci/report-end.yml
 
   - job: macOS
+    condition: false
     timeoutInMinutes: 360
     pool:
       vmImage: 'macOS-10.14'
@@ -135,7 +137,7 @@ jobs:
   - job: Windows
     timeoutInMinutes: 360
     pool:
-      name: 'windows-pool'
+      name: 'garys-windows-pool'
     steps:
       - template: ci/report-start.yml
       - template: ci/build-windows.yml
@@ -145,7 +147,7 @@ jobs:
   - job: perf
     timeoutInMinutes: 60
     pool:
-      name: 'linux-pool'
+      name: 'garys-linux-pool'
     steps:
       - template: ci/report-start.yml
       - checkout: self
@@ -176,7 +178,7 @@ jobs:
     dependsOn: [ "Windows", "Linux" ]
     pool:
       name: 'windows-pool'
-    condition: and(succeeded(), eq(dependencies.Linux.outputs['release.has_released'], 'true'))
+    condition: and(false,succeeded(), eq(dependencies.Linux.outputs['release.has_released'], 'true'))
     variables:
       unsigned-installer: $[ dependencies.Windows.outputs['publish.artifact-unsigned-windows-installer'] ]
     steps:
@@ -215,7 +217,7 @@ jobs:
     dependsOn: [ "Linux", "macOS", "Windows", "Windows_signing", "perf"]
     pool:
       vmImage: "Ubuntu-16.04"
-    condition: and(succeeded(),
+    condition: and(false,succeeded(),
                    eq( dependencies.Linux.outputs['release.has_released'], 'true' ),
                    eq( dependencies.Windows.outputs['release.has_released'], 'true' ),
                    eq( dependencies.Windows_signing.outputs['signing.has_released'], 'true' ),
@@ -294,7 +296,7 @@ jobs:
     dependsOn: [ "Linux", "macOS", "Windows", "Windows_signing", "perf"]
     pool:
       vmImage: "Ubuntu-16.04"
-    condition: and(succeeded(),
+    condition: and(false,succeeded(),
                    eq( dependencies.Linux.outputs['release.has_released'], 'true' ),
                    eq( dependencies.Windows.outputs['release.has_released'], 'true' ),
                    eq( dependencies.Windows_signing.outputs['signing.has_released'], 'true' ),
@@ -325,7 +327,7 @@ jobs:
       - template: ci/tell-slack-failed.yml
 
   - job: collect_build_data
-    condition: always()
+    condition: false #always()
     dependsOn:
       - Linux
       - macOS
@@ -500,7 +502,7 @@ jobs:
           PR_BRANCH: $(pr.branch)
 
   - job: notify_user
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: false #eq(variables['Build.Reason'], 'PullRequest')
     dependsOn:
       - git_sha
       - collect_build_data
