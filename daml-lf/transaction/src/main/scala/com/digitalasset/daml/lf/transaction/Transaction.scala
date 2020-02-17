@@ -567,8 +567,8 @@ object Transaction {
       }
 
     def resolveCidDiscriminator(node: Node) =
-      node.resolveRelCidV0(cid =>
-        Ref.ContractIdStringV0.assertFromString("0" + cid.discriminator.get.toHexaString))
+      node.resolveRelCid(cid =>
+        Ref.ContractIdString.assertFromString("0" + cid.discriminator.get.toHexaString))
 
     /** Finish building a transaction; i.e., try to extract a complete
       *  transaction from the given 'PartialTransaction'. This fails if
