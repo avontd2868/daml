@@ -275,7 +275,7 @@ final class SandboxServer(
       }
 
       val seedService =
-        if (config.useRandomCid)
+        if (config.useSortableCid)
           None
         else
           Some(crypto.Hash.secureRandom(SecureRandom.getInstanceStrong.generateSeed(32)))

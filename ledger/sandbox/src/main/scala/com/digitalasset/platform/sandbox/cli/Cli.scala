@@ -192,10 +192,10 @@ object Cli {
       .text("Enables JWT-based authorization, where the JWT is signed by RSA256 with a public key loaded from the given JWKS URL")
       .action( (url, config) => config.copy(authService = Some(AuthServiceJWT(JwksVerifier(url)))))
 
-    opt[Unit]("random-cid")
+    opt[Unit]("sortable-ci")
         .optional()
-        .text("(Experimental) use new random contract ids scheme")
-        .action( (_, config) => config.copy(useRandomCid = true))
+        .text("(Experimental) use new sortable contract ids")
+        .action( (_, config) => config.copy(useSortableCid = true))
 
     help("help").text("Print the usage text")
 
