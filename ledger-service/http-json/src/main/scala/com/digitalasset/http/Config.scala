@@ -20,7 +20,7 @@ import scala.util.Try
 private[http] final case class Config(
     ledgerHost: String,
     ledgerPort: Int,
-    address: String = "0.0.0.0",
+    address: String = "127.0.0.1",
     httpPort: Int,
     applicationId: ApplicationId = ApplicationId("HTTP-JSON-API-Gateway"),
     packageReloadInterval: FiniteDuration = HttpService.DefaultPackageReloadInterval,
