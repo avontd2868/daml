@@ -15,6 +15,8 @@ final case class Configuration(
     generation: Long,
     /** The time model of the ledger. Specifying the time-to-live bounds for Ledger API commands. */
     timeModel: TimeModel,
+    /** The maximum time window during which commands can be deduplicated. */
+    maxCommandTtl: Duration,
 )
 
 object Configuration {
@@ -46,6 +48,7 @@ object Configuration {
         Configuration(
           generation = config.getGeneration,
           timeModel = tm,
+          maxCommandTtl = parseDuration(config.getMaxCommandTtl),
         )
       }
 
@@ -74,6 +77,7 @@ object Configuration {
           .setMinSkew(buildDuration(tm.minSkew))
           .setMaxSkew(buildDuration(tm.maxSkew))
       )
+      .setMaxCommandTtl(buildDuration(config.maxCommandTtl))
       .build
   }
 

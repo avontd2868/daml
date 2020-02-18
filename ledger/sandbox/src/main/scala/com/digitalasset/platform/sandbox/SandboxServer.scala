@@ -6,7 +6,7 @@ package com.digitalasset.platform.sandbox
 import java.io.File
 import java.nio.file.Files
 import java.security.SecureRandom
-import java.time.Instant
+import java.time.{Duration, Instant}
 
 import akka.actor.ActorSystem
 import akka.stream.Materializer
@@ -224,7 +224,8 @@ final class SandboxServer(
     implicit val actorSystem: ActorSystem = materializer.system
     implicit val executionContext: ExecutionContext = materializer.executionContext
 
-    val defaultConfiguration = ParticipantState.Configuration(0, config.timeModel)
+    val defaultConfiguration =
+      ParticipantState.Configuration(0, config.timeModel, Duration.ofDays(1L))
 
     val (acs, ledgerEntries, mbLedgerTime) = createInitialState(config, packageStore)
 

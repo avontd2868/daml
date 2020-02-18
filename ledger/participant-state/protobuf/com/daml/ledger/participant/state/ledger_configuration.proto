@@ -31,6 +31,9 @@ message LedgerConfiguration {
   // The ledger time model, specifying the bounds for
   // ledger effective time and maximum record time of transactions.
   LedgerTimeModel time_model = 3;
+
+  // The maximum time window during which commands can be deduplicated.
+  google.protobuf.Duration max_command_ttl = 4;
 }
 
 message LedgerTimeModel {
