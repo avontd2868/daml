@@ -293,3 +293,25 @@ As a last resort for these cases, your tests can use the reset service, which le
 The reset service has a single ``reset`` method that will cause all the accumulated state to be dropped, including all active contracts, the entire history of transactions and all allocated users. Only the DAML packages loaded in the ledger are preserved, thereby saving the time needed for reloading them as opposed to simply spinning up a new ledger.
 
 The reset service momentarily shuts down the gRPC channel it communicates over, so your testing infrastructure must take this into account and, when the ``reset`` is invoked, must ensure that tests are temporarily suspended as attempts to reconnect with the rebooted ledger are performed. There is no guarantee as to how long the reset will take, so this should also be taken into account when attempting to reconnect.
+
+.. _handling-submission-failures:
+
+Handle failures when submitting commands
+****************************************
+
+The interaction of a DAML application with the ledger is inherently asynchronous: applications send commands to the ledger, and some time later they see the effect of that command on the ledger.
+
+There are several things that can fail during this time window: the application can crash, the participant node can crash, messages can be lost on the network, or the ledger may be just slow to respond due to a high load. 
+
+If you want to make sure no command is executed twice (especially important with non-consuming choices), your application needs to robustly handle all the various failure scenarios.
+DAML ledgers provide **command deduplication** to solve this problem:
+Applications can assign a “time to live” (TTL) to each command,
+and the ledger will guarantee that duplicate commands (using the same submitter and command ID) will be ignored within this time window.
+
+To use command deduplication, you should:
+
+- Use generous values for the TTL. It should be large enough such that you can assume the command was permanently lost if the TTL has passed and you still don’t observe any effect of the command on the ledger.
+- Make sure you set command IDs deterministically - the "same" command must use the same command ID.
+- If you are not sure whether a command was submitted successfully, just resubmit it. If the new command was submitted within the TTL window, the duplicate submission will safely be ignored. If the TTL window has passed, you can assume the command was lost or rejected and a new submission is justified.
+
+For more details on command deduplication, see the :ref:`Ledger API Services <command-submission-service-deduplication>` documentation.
