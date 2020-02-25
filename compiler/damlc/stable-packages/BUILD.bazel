@@ -4,7 +4,7 @@
 load("//bazel_tools:haskell.bzl", "da_haskell_binary")
 
 da_haskell_binary(
-    name = "generate-stable-package",
+    name = "gsp",
     srcs = glob(["src/**/*.hs"]),
     hackage_deps = [
         "base",
@@ -44,25 +44,25 @@ genrule(
         "daml-stdlib/DA-Internal-Down.dalf",
     ],
     cmd = """
-      $(location :generate-stable-package) --module GHC.Types -o $(location daml-prim/GHC-Types.dalf)
-      $(location :generate-stable-package) --module GHC.Prim -o $(location daml-prim/GHC-Prim.dalf)
-      $(location :generate-stable-package) --module GHC.Tuple -o $(location daml-prim/GHC-Tuple.dalf)
-      $(location :generate-stable-package) --module DA.Internal.Erased -o $(location daml-prim/DA-Internal-Erased.dalf)
-      $(location :generate-stable-package) --module DA.Internal.PromotedText -o $(location daml-prim/DA-Internal-PromotedText.dalf)
-      $(location :generate-stable-package) --module DA.Types -o $(location daml-prim/DA-Types.dalf)
-      $(location :generate-stable-package) --module DA.Time.Types -o $(location daml-stdlib/DA-Time-Types.dalf)
-      $(location :generate-stable-package) --module DA.NonEmpty.Types -o $(location daml-stdlib/DA-NonEmpty-Types.dalf)
-      $(location :generate-stable-package) --module DA.Date.Types -o $(location daml-stdlib/DA-Date-Types.dalf)
-      $(location :generate-stable-package) --module DA.Semigroup.Types -o $(location daml-stdlib/DA-Semigroup-Types.dalf)
-      $(location :generate-stable-package) --module DA.Monoid.Types -o $(location daml-stdlib/DA-Monoid-Types.dalf)
-      $(location :generate-stable-package) --module DA.Logic.Types -o $(location daml-stdlib/DA-Logic-Types.dalf)
-      $(location :generate-stable-package) --module DA.Validation.Types -o $(location daml-stdlib/DA-Validation-Types.dalf)
-      $(location :generate-stable-package) --module DA.Internal.Down -o $(location daml-stdlib/DA-Internal-Down.dalf)
+      $(location :gsp) --module GHC.Types -o $(location daml-prim/GHC-Types.dalf)
+      $(location :gsp) --module GHC.Prim -o $(location daml-prim/GHC-Prim.dalf)
+      $(location :gsp) --module GHC.Tuple -o $(location daml-prim/GHC-Tuple.dalf)
+      $(location :gsp) --module DA.Internal.Erased -o $(location daml-prim/DA-Internal-Erased.dalf)
+      $(location :gsp) --module DA.Internal.PromotedText -o $(location daml-prim/DA-Internal-PromotedText.dalf)
+      $(location :gsp) --module DA.Types -o $(location daml-prim/DA-Types.dalf)
+      $(location :gsp) --module DA.Time.Types -o $(location daml-stdlib/DA-Time-Types.dalf)
+      $(location :gsp) --module DA.NonEmpty.Types -o $(location daml-stdlib/DA-NonEmpty-Types.dalf)
+      $(location :gsp) --module DA.Date.Types -o $(location daml-stdlib/DA-Date-Types.dalf)
+      $(location :gsp) --module DA.Semigroup.Types -o $(location daml-stdlib/DA-Semigroup-Types.dalf)
+      $(location :gsp) --module DA.Monoid.Types -o $(location daml-stdlib/DA-Monoid-Types.dalf)
+      $(location :gsp) --module DA.Logic.Types -o $(location daml-stdlib/DA-Logic-Types.dalf)
+      $(location :gsp) --module DA.Validation.Types -o $(location daml-stdlib/DA-Validation-Types.dalf)
+      $(location :gsp) --module DA.Internal.Down -o $(location daml-stdlib/DA-Internal-Down.dalf)
       # These types are not serializable but they leak into typeclass methods so they need to be stable.
-      $(location :generate-stable-package) --module DA.Internal.Any -o $(location daml-stdlib/DA-Internal-Any.dalf)
-      $(location :generate-stable-package) --module DA.Internal.Template -o $(location daml-stdlib/DA-Internal-Template.dalf)
+      $(location :gsp) --module DA.Internal.Any -o $(location daml-stdlib/DA-Internal-Any.dalf)
+      $(location :gsp) --module DA.Internal.Template -o $(location daml-stdlib/DA-Internal-Template.dalf)
     """,
-    tools = [":generate-stable-package"],
+    tools = [":gsp"],
     visibility = ["//visibility:public"],
 )
 
