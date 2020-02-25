@@ -7,7 +7,6 @@ module Options (
   ) where
 
 import           Control.Monad.Logger
-import           Data.Monoid ((<>))
 import           Options.Applicative
 
 import Types

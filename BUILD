@@ -267,7 +267,7 @@ da_haskell_repl(
         "//compiler/daml-lf-ast:tests",
         "//compiler/damlc/daml-doc:daml-doc-testing",
         "//compiler/damlc/daml-ide-core:ide-testing",
-        "//compiler/damlc/stable-packages:generate-stable-package",
+        "//compiler/damlc/stable-packages:gsp",
         "//compiler/damlc/tests:daml-doctest",
         "//compiler/damlc/tests:generate-simple-dalf",
         "//compiler/damlc/tests:integration-dev",

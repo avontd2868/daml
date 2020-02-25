@@ -6,7 +6,6 @@ module Main (main) where
 
 import Control.Monad.Extra
 import Control.Monad.IO.Class
-import Control.Monad.Logger
 import Control.Exception
 import Data.Yaml
 import qualified Data.Set as Set
