@@ -50,6 +50,8 @@ bazel shutdown
 # It isn’t clear where exactly those errors are coming from.
 bazel fetch @nodejs_dev_env//...
 
+bazel build @proto3_suite//:compile-proto-file
+
 bazel build //...
 
 bazel shutdown
