@@ -688,6 +688,7 @@ abstract class ParticipantStateIntegrationSpecBase(implementationName: String)
       applicationId = Ref.LedgerString.assertFromString("tests"),
       commandId = Ref.LedgerString.assertFromString(commandId),
       maxRecordTime = inTheFuture(10.seconds),
+      ttl = inTheFuture(10.seconds).toInstant,
     )
 
   private def theOffset(first: Long, rest: Long*): Offset =
@@ -743,7 +744,7 @@ object ParticipantStateIntegrationSpecBase {
 
   private def matchTransaction(update: Update, expectedCommandId: String): Assertion =
     inside(update) {
-      case TransactionAccepted(Some(SubmitterInfo(_, _, actualCommandId, _)), _, _, _, _, _) =>
+      case TransactionAccepted(Some(SubmitterInfo(_, _, actualCommandId, _, _)), _, _, _, _, _) =>
         actualCommandId should be(expectedCommandId)
     }
 }

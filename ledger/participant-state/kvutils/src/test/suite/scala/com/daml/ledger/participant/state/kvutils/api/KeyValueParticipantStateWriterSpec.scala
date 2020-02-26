@@ -86,7 +86,8 @@ class KeyValueParticipantStateWriterSpec extends WordSpec with MockitoSugar {
   private val aSubmissionId: SubmissionId =
     Ref.LedgerString.assertFromString(UUID.randomUUID().toString)
 
-  private val aConfiguration: Configuration = Configuration(1, TimeModel.reasonableDefault, Duration.ofDays(1L))
+  private val aConfiguration: Configuration =
+    Configuration(1, TimeModel.reasonableDefault, Duration.ofDays(1L))
 
   private def createWriter(captor: Option[ArgumentCaptor[Array[Byte]]] = None): LedgerWriter = {
     val writer = mock[LedgerWriter]
@@ -100,7 +101,8 @@ class KeyValueParticipantStateWriterSpec extends WordSpec with MockitoSugar {
     submitter = party,
     applicationId = Ref.LedgerString.assertFromString("tests"),
     commandId = Ref.LedgerString.assertFromString("X"),
-    maxRecordTime = rt.addMicros(Duration.ofSeconds(10).toNanos / 1000)
+    maxRecordTime = rt.addMicros(Duration.ofSeconds(10).toNanos / 1000),
+    ttl = rt.addMicros(Duration.ofDays(1).toNanos / 1000).toInstant,
   )
 
   private def transactionMeta(let: Timestamp) = TransactionMeta(

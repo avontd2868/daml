@@ -199,14 +199,16 @@ object KVTest {
       tx: SubmittedTransaction,
       mrtDelta: Duration = minMRTDelta,
       letDelta: Duration = Duration.ZERO,
-      commandId: CommandId = randomLedgerString): KVTest[(DamlLogEntryId, DamlLogEntry)] =
+      commandId: CommandId = randomLedgerString,
+      ttlDelta: Duration = Duration.ofDays(1L)): KVTest[(DamlLogEntryId, DamlLogEntry)] =
     for {
       testState <- get[KVTestState]
       submInfo = SubmitterInfo(
         submitter = submitter,
         applicationId = Ref.LedgerString.assertFromString("test"),
         commandId = commandId,
-        maxRecordTime = testState.recordTime.addMicros(mrtDelta.toNanos / 1000)
+        maxRecordTime = testState.recordTime.addMicros(mrtDelta.toNanos / 1000),
+        ttl = testState.recordTime.addMicros(ttlDelta.toNanos / 1000).toInstant,
       )
       subm = KeyValueSubmission.transactionToSubmission(
         submitterInfo = submInfo,
