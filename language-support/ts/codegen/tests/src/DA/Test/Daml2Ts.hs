@@ -12,12 +12,10 @@ import System.Process
 import System.Exit
 import DA.Directory
 import DA.Bazel.Runfiles
-import Data.Maybe
+-- import Data.Maybe
 import Data.List.Extra
 import Test.Tasty
 import Test.Tasty.HUnit
-
-import SdkVersion
 
 main :: IO ()
 main = do
@@ -27,76 +25,56 @@ main = do
     davl <- locateRunfiles ("davl" </> "released")
     yarnPath : damlTypes : args <- getArgs
     yarn <- locateRunfiles (mainWorkspace </> yarnPath)
-    withTempDir $ \rootDir ->
-      withArgs args (
-        defaultMain $
-          withResource
-          (yarnInstall yarn damlTypes rootDir) (\_ -> pure ())
-          (\_ -> tests rootDir yarn damlc daml2ts davl)
-        )
-
-yarnInstall :: FilePath -> FilePath -> FilePath -> IO ()
-yarnInstall yarn damlTypes rootDir = do
-  let here = rootDir </> "pre-test"
-  let dummyTs = here </> "dummy-ts"
-  createDirectoryIfMissing True dummyTs
-  copyDirectory damlTypes (rootDir </> "daml-types")
-  writePackageConfigs dummyTs
-  withCurrentDirectory rootDir $ yarnProject' yarn ["install"]
+    withArgs args (defaultMain $ tests damlTypes yarn damlc daml2ts davl)
 
 tests :: FilePath -> FilePath -> FilePath -> FilePath -> FilePath -> TestTree
-tests rootDir yarn damlc daml2ts davl = testGroup "daml2Ts"
-  [ testCase "Pre-test yarn check" $ do
-      assertBool "'node_modules' does not exist" =<< doesDirectoryExist rootDir
-      assertBool "'yarn.lock' does not exist " =<< doesFileExist (rootDir </> "yarn.lock")
-
-  , testCaseSteps "Breathing test" $ \step -> do
-      let here = rootDir </> "breathing-test"
+tests damlTypes yarn damlc daml2ts _davl = testGroup "daml2ts tests"
+  [
+    testCaseSteps "Breathing test" $ \step -> withTempDir $ \here -> do
+      root <- getCurrentDirectory -- From where the tests are invoked.
+      let damlTypesDir = root </> damlTypes -- 'damlTypes' is relative.
+          -- These paths are all under the temp directory 'here'.
           grover = here </> "grover"
           groverDaml = grover </> "daml"
-          groverTs = here </> "grover-ts"
+          daml2tsDir = here </> "daml2ts"
+          groverTs =  daml2tsDir </> "grover-1.0"
           groverTsSrc = groverTs </> "src"
           groverTsLib = groverTs </> "lib"
           groverDar = grover </> ".daml" </> "dist" </> "grover-1.0.dar"
-      step "Creating project 'grover'..."
+      createDirectoryIfMissing True grover
       createDirectoryIfMissing True groverDaml
-      createDirectoryIfMissing True groverTs
-      writeFileUTF8 (groverDaml </> "Grover.daml") $ unlines
-        [ "daml 1.2"
-        , "module Grover where"
-        , "template Grover"
-        , "  with puppeteer : Party"
-        , "  where"
-        , "    signatory puppeteer"
-        , "    choice Grover_GoSuper: ContractId Grover"
-        , "      controller puppeteer"
-        , "      do"
-        , "        return self"
-        ]
-      writeFileUTF8 (grover </> "daml.yaml") $ unlines
-        [ "sdk-version: " <> sdkVersion
-        , "name: grover"
-        , "version: \"1.0\""
-        , "source: daml"
-        , "exposed-modules: [Grover]"
-        , "dependencies:"
-        , "  - daml-prim"
-        , "  - daml-stdlib"
-        ]
-      buildProject grover []
-      assertBool "grover-1.0.dar was not created." =<< doesFileExist groverDar
-      step "Generating TypeScript of 'grover'..."
-      daml2tsProject [groverDar] (groverTs </> "src")
-      assertBool "'Grover.ts' was not created." =<< doesFileExist (groverTsSrc </> "grover-1.0" </> "Grover.ts")
-      assertBool "'packageId.ts' was not created." =<< doesFileExist (groverTsSrc </> "grover-1.0" </> "packageId.ts")
-      step "Compiling 'grover-ts' to JavaScript... "
-      writePackageConfigs groverTs
-      withCurrentDirectory groverTs $ do
-        yarnProject ["run", "build"]
-        assertBool "'Grover.js' was not created." =<< doesFileExist (groverTsLib </> "grover-1.0" </> "Grover.js")
-        step "Linting 'grover-ts' ... "
-        yarnProject ["run", "lint"]
-
+      copyDirectory damlTypesDir (here </> "daml-types")
+      withCurrentDirectory grover $ do
+        writeFileUTF8 (groverDaml </> "Grover.daml") $ unlines
+          [ "module Grover where"
+          , "template Grover"
+          , "  with puppeteer : Party"
+          , "  where"
+          , "    signatory puppeteer"
+          , "    choice Grover_GoSuper: ContractId Grover"
+          , "      controller puppeteer"
+          , "      do"
+          , "        return self"
+          ]
+        writeDamlYaml "grover" ["Grover"] ["daml-prim", "daml-stdlib"]
+        step "daml build..."
+        buildProject []
+        assertBool "grover-1.0.dar was not created." =<< doesFileExist groverDar
+      withCurrentDirectory here $ do
+        step "daml2ts..."
+        writeRootPackageJson
+        daml2tsProject [groverDar] daml2tsDir (here </> "package.json")
+        assertBool "'Grover.ts' was not created." =<< doesFileExist (groverTsSrc </> "Grover.ts")
+        assertBool "'packageId.ts' was not created." =<< doesFileExist (groverTsSrc </> "packageId.ts")
+        step "yarn install..."
+        yarnProject ["install"]
+        writeFile "package.json" .  replace "    \"daml-types\"," "" =<< readFile' "package.json"
+        step "yarn workspaces run build..."
+        yarnProject ["workspaces", "run", "build"]
+        assertBool "'Grover.js' was not created." =<< doesFileExist (groverTsLib </> "Grover.js")
+        step "yarn workspaces run lint"
+        yarnProject ["workspaces", "run", "lint"]
+{-
   , testCaseSteps "Dependency test" $ \step -> do
       let here = rootDir </> "dependency-test"
           grover = here </> "grover"
@@ -240,6 +218,7 @@ tests rootDir yarn damlc daml2ts davl = testGroup "daml2Ts"
         , "source: daml"
         , "exposed-modules: [Elmo]"
         , "dependencies:"
+
         , "  - daml-prim"
         , "  - daml-stdlib"
         ]
@@ -380,128 +359,47 @@ tests rootDir yarn damlc daml2ts davl = testGroup "daml2Ts"
         assertBool "'davl-upgrade-v4-v5-0.0.5/Upgrade.js' was not created." =<< doesFileExist (davlTsLib </> "davl-upgrade-v4-v5-0.0.5" </> "Upgrade.js")
         step "Linting 'davl' ... "
         yarnProject ["run", "lint"]
+-}
      ]
   where
-    buildProject' :: FilePath -> FilePath -> [String] -> IO ()
-    buildProject' damlc dir args = withCurrentDirectory dir $ callProcessSilent damlc (["build"] ++ args)
+    buildProject' :: FilePath -> [String] -> IO ()
+    buildProject' damlc args = callProcessSilent damlc (["build"] ++ args)
     buildProject = buildProject' damlc
 
-    daml2tsProject' :: FilePath -> [FilePath] -> FilePath -> IO ()
-    daml2tsProject' daml2ts dars outDir = callProcessSilent daml2ts $ dars ++ ["-o", outDir]
+    daml2tsProject' :: FilePath -> [FilePath] -> FilePath -> FilePath -> IO ()
+    daml2tsProject' daml2ts dars outDir packageJson = callProcessSilent daml2ts $ dars ++ ["-o", outDir, "-p", packageJson]
     daml2tsProject = daml2tsProject' daml2ts
 
+    yarnProject' :: FilePath -> [String] -> IO ()
+    yarnProject' yarn args = callProcessSilent yarn args
     yarnProject = yarnProject' yarn
 
-yarnProject' :: FilePath -> [String] -> IO ()
-yarnProject' yarn args = callProcessSilent yarn args
+    callProcessSilent :: FilePath -> [String] -> IO ()
+    callProcessSilent cmd args = do
+        (exitCode, out, err) <- readProcessWithExitCode cmd args ""
+        unless (exitCode == ExitSuccess) $ do
+          hPutStrLn stderr $ "Failure: Command \"" <> cmd <> " " <> unwords args <> "\" exited with " <> show exitCode
+          hPutStrLn stderr $ unlines ["stdout:", out]
+          hPutStrLn stderr $ unlines ["stderr: ", err]
 
--- | Only displays stdout and stderr on errors
-callProcessSilent :: FilePath -> [String] -> IO ()
-callProcessSilent cmd args = do
-    (exitCode, out, err) <- readProcessWithExitCode cmd args ""
-    unless (exitCode == ExitSuccess) $ do
-      hPutStrLn stderr $ "Failure: Command \"" <> cmd <> " " <> unwords args <> "\" exited with " <> show exitCode
-      hPutStrLn stderr $ unlines ["stdout:", out]
-      hPutStrLn stderr $ unlines ["stderr: ", err]
-      exitFailure
-
-writePackageConfigs :: FilePath -> IO ()
-writePackageConfigs dir = do
-  -- e.g. /path/to/root/pre-test/dummy-ts
-  --        tsDir = dummy-ts
-  --        testDir = pre-test
-  --        rootDir = /path/to/root
-  --        workspace = pre-test/dummy-ts
-  let tsDir = takeFileName dir
-      testDir = takeFileName (takeDirectory dir)
-      rootDir = takeDirectory (takeDirectory dir)
-      workspace = testDir <> "/" <> tsDir
-  writeTsConfig dir
-  writeEsLintConfig dir
-  writePackageJson dir
-  -- The existence of 'package.json' at root level is critical to
-  -- making our scheme of doing 'yarn install' just once work.
-  writeRootPackageJson rootDir workspace
-
-  where
-    writeTsConfig :: FilePath -> IO ()
-    writeTsConfig dir = writeFileUTF8 (dir </> "tsconfig.json") $ unlines
-        [ "{"
-        , "  \"compilerOptions\": {"
-        , "    \"target\": \"es5\","
-        , "    \"lib\": ["
-        , "      \"es2015\""
-        , "     ],"
-        , "    \"strict\": true,"
-        , "    \"noUnusedLocals\": true,"
-        , "    \"noUnusedParameters\": false,"
-        , "    \"noImplicitReturns\": true,"
-        , "    \"noFallthroughCasesInSwitch\": true,"
-        , "    \"outDir\": \"lib\","
-        , "    \"module\": \"commonjs\","
-        , "    \"declaration\": true,"
-        , "    \"sourceMap\": true"
-        , "    },"
-        , "  \"include\": [\"src/**/*.ts\"],"
-        , "}"
-        ]
-
-    writeEsLintConfig :: FilePath -> IO ()
-    writeEsLintConfig dir = writeFileUTF8 (dir </> ".eslintrc.json") $ unlines
-      [ "{"
-      , "  \"parser\": \"@typescript-eslint/parser\","
-      , "  \"parserOptions\": {"
-      , "    \"project\": \"./tsconfig.json\""
-      , "  },"
-      , "  \"plugins\": ["
-      , "    \"@typescript-eslint\""
-      , "  ],"
-      , "  \"extends\": ["
-      , "    \"eslint:recommended\","
-      , "    \"plugin:@typescript-eslint/eslint-recommended\","
-      , "    \"plugin:@typescript-eslint/recommended\","
-      , "    \"plugin:@typescript-eslint/recommended-requiring-type-checking\""
-      , "  ],"
-      , "  \"rules\": {"
-      , "    \"@typescript-eslint/explicit-function-return-type\": \"off\","
-      , "    \"@typescript-eslint/no-inferrable-types\": \"off\""
-      , "  }"
-      , "}"
-      ]
-
-    writePackageJson :: FilePath -> IO ()
-    writePackageJson dir = let name = takeFileName dir in writeFileUTF8 (dir </> "package.json") $ unlines
-            ["{"
-            , "  \"private\": true,"
-            , "  \"name\": \"@daml2ts/" <> name <> "\","
-            , "  \"version\": \"" <> sdkVersion <> "\","
-            , "  \"description\": \"Produced by daml2ts\","
-            , "  \"license\": \"Apache-2.0\","
-            , "  \"dependencies\": {"
-            , "    \"@daml/types\": \"" <> sdkVersion <> "\","
-            , "    \"@mojotech/json-type-validation\": \"^3.1.0\""
-            , "  },"
-            , "  \"scripts\": {"
-            , "    \"build\": \"tsc --build\","
-            , "    \"lint\": \"eslint --ext .ts src/ --max-warnings 0\""
-            , "  },"
-            , "  \"devDependencies\": {"
-            , "    \"@typescript-eslint/eslint-plugin\": \"^2.11.0\","
-            , "    \"@typescript-eslint/parser\": \"^2.11.0\","
-            , "    \"eslint\": \"^6.7.2\","
-            , "    \"typescript\": \"~3.7.3\""
-            , "  }"
-            , "}"
-            ]
-
-    writeRootPackageJson :: FilePath -> String -> IO ()
-    writeRootPackageJson rootDir workspace =
-       writeFileUTF8 (rootDir </> "package.json") $ unlines
+    writeRootPackageJson :: IO ()
+    writeRootPackageJson =
+       writeFileUTF8 "package.json" $ unlines
          [ "{"
          , "  \"private\": true,"
          , "  \"workspaces\": ["
-         , "    \"daml-types\","
-         , "    \"" <> workspace <> "\""
+         , "    \"daml-types\""
          , "  ]"
          , "}"
          ]
+
+    writeDamlYaml :: String -> [String] -> [String] -> IO ()
+    writeDamlYaml mainPackageName exposedModules dependencies =
+      writeFileUTF8 "daml.yaml" $ unlines (
+        [ "sdk-version: 0.0.0"
+        , "name: " <> mainPackageName
+        , "version: \"1.0\""
+        , "source: daml"
+        , "exposed-modules: [" <> intercalate "," exposedModules <> "]"
+        , "dependencies:"] ++ ["  - " ++ dependency | dependency <- dependencies]
+      )
