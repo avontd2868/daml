@@ -113,7 +113,8 @@ class ImplicitPartyAdditionIT
       Ref.Party.assertFromString(submitter),
       Ref.LedgerString.assertFromString("appId"),
       Ref.LedgerString.assertFromString(commandId),
-      Time.Timestamp.assertFromInstant(MRT)
+      Time.Timestamp.assertFromInstant(MRT),
+      Instant.EPOCH,
     )
 
     val transactionMeta = TransactionMeta(

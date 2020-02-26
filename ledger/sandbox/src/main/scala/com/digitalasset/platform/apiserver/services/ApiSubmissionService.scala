@@ -3,7 +3,7 @@
 
 package com.digitalasset.platform.apiserver.services
 
-import java.time.Instant
+import java.time.{Duration, Instant}
 
 import akka.stream.Materializer
 import com.codahale.metrics.{Meter, MetricRegistry, Timer}
@@ -50,7 +50,6 @@ import io.grpc.Status
 import scalaz.syntax.tag._
 
 import scala.compat.java8.FutureConverters
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -81,14 +80,17 @@ object ApiSubmissionService {
         commandExecutor,
         configuration,
         metrics),
-      ledgerId
+      ledgerId,
+      () => Instant.now(),
+      () => configuration.maxTtl
     )
 
   object RecordUpdate {
     def apply(views: Either[LfError, (Transaction, BlindingInfo)]): RecordUpdate = views
   }
 
-  final case class Configuration(maxTtl: FiniteDuration)
+  // TODO(RC): this should be updated dynamically from the ledger configuration
+  final case class Configuration(maxTtl: Duration)
 }
 
 final class ApiSubmissionService private (
@@ -127,8 +129,8 @@ final class ApiSubmissionService private (
   private def deduplicateAndRecordOnLedger(commands: ApiCommands)(
       implicit logCtx: LoggingContext): Future[Unit] = {
     val deduplicationKey = commands.submitter + "%" + commands.commandId.unwrap
-    val submittedAt = Instant.now
-    val ttl = submittedAt.plusNanos(commands.ttl.getOrElse(configuration.maxTtl).toNanos)
+    val submittedAt = commands.submittedAt
+    val ttl = commands.ttl
 
     submissionService.deduplicateCommand(deduplicationKey, submittedAt, ttl).flatMap {
       case CommandDeduplicationNew =>

@@ -3,6 +3,8 @@
 
 package com.digitalasset.ledger.api.validation
 
+import java.time.{Duration, Instant}
+
 import com.digitalasset.api.util.TimestampConversion
 import com.digitalasset.daml.lf.command._
 import com.digitalasset.daml.lf.data._
@@ -28,7 +30,10 @@ final class CommandsValidator(ledgerId: LedgerId) {
 
   import ValueValidator._
 
-  def validateCommands(commands: ProtoCommands): Either[StatusRuntimeException, domain.Commands] =
+  def validateCommands(
+      commands: ProtoCommands,
+      currentTime: => Instant,
+      maxTtl: => Duration): Either[StatusRuntimeException, domain.Commands] =
     for {
       cmdLegerId <- requireLedgerString(commands.ledgerId, "ledger_id")
       ledgerId <- matchLedgerId(ledgerId)(LedgerId(cmdLegerId))
@@ -57,7 +62,8 @@ final class CommandsValidator(ledgerId: LedgerId) {
         submitter = submitter,
         ledgerEffectiveTime = ledgerEffectiveTime,
         maximumRecordTime = TimestampConversion.toInstant(mrt),
-        ttl = ttl,
+        submittedAt = currentTime,
+        ttl = currentTime.plus(ttl.getOrElse(maxTtl)),
         commands = Commands(
           submitter = submitter,
           commands = ImmArray(validatedCommands),

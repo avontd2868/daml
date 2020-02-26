@@ -138,7 +138,8 @@ object ApiServices {
           commandConfig.maxCommandsInFlight,
           commandConfig.limitMaxCommandsInFlight,
           commandConfig.historySize,
-          commandConfig.retentionPeriod
+          commandConfig.retentionPeriod,
+          submissionConfig.maxTtl
         ),
         // Using local services skips the gRPC layer, improving performance.
         ApiCommandService.LowLevelCommandServiceAccess.LocalServices(
