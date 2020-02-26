@@ -59,7 +59,6 @@ import qualified Data.NameMap as NM
 import qualified Data.Text.Extended as T
 import Development.IDE.Core.API
 import Development.IDE.Core.Debouncer
-import Development.IDE.Core.RuleTypes.Daml (GetParsedModule(..))
 import Development.IDE.Core.Rules
 import Development.IDE.Core.Rules.Daml (getDlintIdeas)
 import Development.IDE.Core.Shake

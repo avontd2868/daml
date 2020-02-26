@@ -5,6 +5,7 @@
 module Main (main) where
 
 import Control.Monad.Extra
+import Control.Monad.Logger
 import Control.Monad.IO.Class
 import Control.Exception
 import Data.Yaml
