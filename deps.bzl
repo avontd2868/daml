@@ -31,8 +31,8 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 rules_scala_version = "6c16cff213b76a4126bdc850956046da5db1daaa"
 
-rules_haskell_version = "eaa89858c44913f65fb48637d75e3190a912f3ae"
-rules_haskell_sha256 = "c2b42f35ecc4c90bf8a5a4d90a1c1e3937513309904809d4c02ce12cf9cc4093"
+rules_haskell_version = "7907a93c345a3c36ba415e874e328079604228c9"
+rules_haskell_sha256 = "881222467e766bf9978bfd0b7cabc1154ef34dd515530c103804e8093ee85439"
 rules_nixpkgs_version = "c966bb8bd335f1e244c03efe6e7a1afa9784038e"
 rules_nixpkgs_sha256 = "ccafea4fc4d5fa2ddba2882f76728558bfe2c12657f7f56078ece43a31761148"
 davl_version = "51d3977be2ab22f7f4434fd4692ca2e17a7cce23"
@@ -60,8 +60,6 @@ def daml_deps():
                 # This should be made configurable in rules_haskell.
                 # Remove this patch once that's available.
                 "@com_github_digital_asset_daml//bazel_tools:haskell-opt.patch",
-                # This should be fixed in upstream rules_haskell.
-                "@com_github_digital_asset_daml//bazel_tools:haskell-cffi.patch",
             ],
             patch_args = ["-p1"],
             sha256 = rules_haskell_sha256,
