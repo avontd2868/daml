@@ -49,7 +49,7 @@ class CommandExecutorImpl(
         Option[Value.ContractInst[TxValue[Value.AbsoluteContractId]]]],
       lookupKey: GlobalKey => Future[Option[AbsoluteContractId]],
       commands: Commands,
-  ): Future[Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.AbsTransaction)]] = {
+  ): Future[Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.Transaction)]] = {
 
     consume(engine.submit(commands, participant, submissionSeed))(
       getPackage,
@@ -73,7 +73,7 @@ class CommandExecutorImpl(
               submitted.workflowId.map(_.unwrap),
               submissionSeed,
             ),
-            updateTx.assertNoRelCid(_ => "Unexpected relative contract ids")
+            updateTx,
           )).left.map(ErrorCause.DamlLf)
       }
   }

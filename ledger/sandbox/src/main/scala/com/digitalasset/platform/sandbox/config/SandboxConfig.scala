@@ -44,7 +44,7 @@ object SandboxConfig {
 
   val DefaultMaxInboundMessageSize = 4194304
 
-  lazy val default =
+  lazy val nextDefault =
     SandboxConfig(
       address = None,
       port = DefaultPort,
@@ -62,6 +62,9 @@ object SandboxConfig {
       eagerPackageLoading = false,
       logLevel = Level.INFO,
       authService = None,
-      seeding = None,
+      seeding = Some(Seeding.Strong),
     )
+
+  lazy val default: SandboxConfig =
+    nextDefault.copy(seeding = None)
 }

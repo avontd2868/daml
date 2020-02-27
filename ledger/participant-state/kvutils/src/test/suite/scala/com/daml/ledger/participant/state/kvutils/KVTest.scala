@@ -12,6 +12,7 @@ import com.digitalasset.daml.lf.crypto
 import com.digitalasset.daml.lf.data.{ImmArray, Ref}
 import com.digitalasset.daml.lf.data.Time.Timestamp
 import com.digitalasset.daml.lf.engine.Engine
+import com.digitalasset.daml.lf.transaction.Transaction
 import com.digitalasset.daml_lf_dev.DamlLf
 import scalaz.State
 import scalaz.syntax.traverse._
@@ -162,7 +163,7 @@ object KVTest {
       submissionSeed: Option[crypto.Hash],
       additionalContractDataTy: String,
       cmds: Command*,
-  ): KVTest[SubmittedTransaction] =
+  ): KVTest[Transaction.AbsTransaction] =
     for {
       s <- get[KVTestState]
       tx = s.engine
@@ -196,12 +197,12 @@ object KVTest {
       submitter: Party,
       submissionSeed: Option[crypto.Hash],
       cmds: Command*,
-  ): KVTest[SubmittedTransaction] =
+  ): KVTest[Transaction.AbsTransaction] =
     runCommand(submitter, submissionSeed, defaultAdditionalContractDataTy, cmds: _*)
 
   def submitTransaction(
       submitter: Party,
-      tx: SubmittedTransaction,
+      tx: Transaction.AbsTransaction,
       submissionSeed: Option[crypto.Hash],
       mrtDelta: Duration = minMRTDelta,
       letDelta: Duration = Duration.ZERO,

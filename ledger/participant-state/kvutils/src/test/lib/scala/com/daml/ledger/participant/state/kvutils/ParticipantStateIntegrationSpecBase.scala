@@ -16,7 +16,7 @@ import com.digitalasset.daml.lf.archive.DarReader
 import com.digitalasset.daml.lf.crypto
 import com.digitalasset.daml.lf.data.Time.Timestamp
 import com.digitalasset.daml.lf.data.{ImmArray, InsertOrdSet, Ref}
-import com.digitalasset.daml.lf.transaction.GenTransaction
+import com.digitalasset.daml.lf.transaction.{GenTransaction, Transaction}
 import com.digitalasset.daml_lf_dev.DamlLf
 import com.digitalasset.ledger.api.testing.utils.AkkaBeforeAndAfterAll
 import com.digitalasset.logging.LoggingContext
@@ -702,7 +702,7 @@ object ParticipantStateIntegrationSpecBase {
   type ParticipantState = ReadService with WriteService
 
   private val IdleTimeout = 5.seconds
-  private val emptyTransaction: SubmittedTransaction =
+  private val emptyTransaction: Transaction.AbsTransaction =
     GenTransaction(HashMap.empty, ImmArray.empty, Some(InsertOrdSet.empty))
 
   private val participantId: ParticipantId = Ref.ParticipantId.assertFromString("test-participant")

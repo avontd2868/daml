@@ -4,7 +4,7 @@
 package com.daml.ledger.participant.state
 
 import com.digitalasset.daml.lf.data.Ref
-import com.digitalasset.daml.lf.transaction.{GenTransaction, Transaction}
+import com.digitalasset.daml.lf.transaction.Transaction
 import com.digitalasset.daml.lf.value.Value
 
 /** Interfaces to read from and write to an (abstract) participant state.
@@ -97,7 +97,7 @@ package object v1 {
     *  See [[WriteService.submitTransaction]] for details.
     */
   type SubmittedTransaction =
-    GenTransaction.WithTxValue[NodeId, Value.AbsoluteContractId]
+    Transaction.Transaction
 
   /** A transaction with absolute contract identifiers only.
     *
@@ -106,7 +106,7 @@ package object v1 {
     * absolute contract identifiers.
     */
   type CommittedTransaction =
-    GenTransaction.WithTxValue[NodeId, Value.AbsoluteContractId]
+    Transaction.AbsTransaction
 
   /** A contract instance with absolute contract identifiers only. */
   type AbsoluteContractInst =

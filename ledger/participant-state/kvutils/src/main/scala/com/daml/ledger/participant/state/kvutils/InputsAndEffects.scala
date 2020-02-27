@@ -4,12 +4,11 @@
 package com.daml.ledger.participant.state.kvutils
 
 import scala.collection.mutable
-
 import com.daml.ledger.participant.state.kvutils.Conversions._
 import com.daml.ledger.participant.state.kvutils.DamlKvutils._
-import com.daml.ledger.participant.state.v1.SubmittedTransaction
 import com.digitalasset.daml.lf.data.Ref._
 import com.digitalasset.daml.lf.transaction.Node._
+import com.digitalasset.daml.lf.transaction.Transaction
 import com.digitalasset.daml.lf.value.Value.{AbsoluteContractId, ContractId, VersionedValue}
 
 /** Internal utilities to compute the inputs and effects of a DAML transaction */
@@ -44,7 +43,7 @@ private[kvutils] object InputsAndEffects {
   /** Compute the inputs to a DAML transaction, that is, the referenced contracts, keys
     * and packages.
     */
-  def computeInputs(tx: SubmittedTransaction): List[DamlStateKey] = {
+  def computeInputs(tx: Transaction.AbsTransaction): List[DamlStateKey] = {
     val inputs = mutable.LinkedHashSet[DamlStateKey]()
 
     {
@@ -103,7 +102,7 @@ private[kvutils] object InputsAndEffects {
   }
 
   /** Compute the effects of a DAML transaction, that is, the created and consumed contracts. */
-  def computeEffects(entryId: DamlLogEntryId, tx: SubmittedTransaction): Effects = {
+  def computeEffects(entryId: DamlLogEntryId, tx: Transaction.AbsTransaction): Effects = {
     // TODO(JM): Skip transient contracts in createdContracts/updateContractKeys. E.g. rewrite this to
     // fold bottom up (with reversed roots!) and skip creates of archived contracts.
     tx.fold(Effects.empty) {

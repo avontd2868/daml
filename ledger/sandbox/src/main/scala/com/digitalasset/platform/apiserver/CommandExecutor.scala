@@ -26,5 +26,5 @@ trait CommandExecutor {
         Option[Value.ContractInst[Transaction.Value[Value.AbsoluteContractId]]]],
       lookupKey: GlobalKey => Future[Option[AbsoluteContractId]],
       commands: Commands
-  ): Future[Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.AbsTransaction)]]
+  ): Future[Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.Transaction)]]
 }

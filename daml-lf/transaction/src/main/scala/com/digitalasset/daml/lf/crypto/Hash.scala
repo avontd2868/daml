@@ -226,99 +226,6 @@ object Hash {
         case Value.ValueStruct(_) =>
           error("Hashing of struct values is not supported")
       }
-
-    val createTag = 1.toByte
-    val fetchTag = 2.toByte
-    val exerciseTag = 3.toByte
-    val lookupTag = 4.toByte
-
-    @throws[HashingError]
-    final def addKeyWithMaintainers(
-        templateId: Ref.Identifier,
-        key: Node.KeyWithMaintainers[Transaction.Value[Value.ContractId]]
-    ): this.type =
-      add(assertHashContractKey(templateId, key.key.value)).addStringSet(key.maintainers)
-
-    @throws[HashingError]
-    final def addNode(
-        node: Transaction.Node
-    ): this.type =
-      node match {
-        case Node.NodeCreate(
-            nodeSeed @ _,
-            coid,
-            coinst,
-            optLocation @ _,
-            signatories,
-            stakeholders,
-            key,
-            ) =>
-          add(createTag)
-            .addCid(coid)
-            .add(assertHashContract(coinst.template, coinst.arg.value))
-            .addStringSet(signatories)
-            .addStringSet(stakeholders)
-            .iterateOver(key)((b, k) => b.addKeyWithMaintainers(coinst.template, k))
-
-        case Node.NodeExercises(
-            nodeSeed @ _,
-            targetCoid,
-            templateId,
-            choiceId,
-            optLocation @ _,
-            consuming,
-            actingParties,
-            chosenValue,
-            stakeholders,
-            signatories,
-            controllers,
-            children,
-            exerciseResult,
-            key,
-            ) =>
-          add(exerciseTag)
-            .addCid(targetCoid)
-            .addIdentifier(templateId)
-            .add(choiceId)
-            .add(consuming)
-            .addStringSet(actingParties)
-            .addTypedValue(chosenValue.value)
-            .addStringSet(stakeholders)
-            .addStringSet(signatories)
-            .addStringSet(controllers)
-            .add(children.length)
-            .iterateOver(exerciseResult)(_ addTypedValue _.value)
-            .iterateOver(key)((b, k) => b.addKeyWithMaintainers(templateId, k))
-
-        case Node.NodeFetch(
-            coid,
-            templateId,
-            optLocation @ _,
-            actingParties,
-            signatories,
-            stakeholders,
-            ) =>
-          add(fetchTag)
-            .addCid(coid)
-            .addIdentifier(templateId)
-            .addStringSet(actingParties.getOrElse(Set.empty))
-            .addStringSet(signatories)
-            .addStringSet(stakeholders)
-        case Node.NodeLookupByKey(
-            templateId,
-            optLocation @ _,
-            key,
-            result,
-            ) =>
-          add(lookupTag)
-            .addKeyWithMaintainers(templateId, key)
-            .iterateOver(result)(_ addCid _)
-      }
-
-    @throws[HashingError]
-    def addTransaction(tx: Transaction.Transaction): this.type =
-      tx.fold[this.type](add(tx.roots.length))(_ addNode _._2)
-
   }
 
   // The purpose of a hash serves to avoid hash collisions due to equal encodings for different objects.
@@ -420,15 +327,6 @@ object Hash {
       value: Value[Value.ContractId],
   ): Either[String, Hash] =
     handleError(assertHashContract(templateId, value))
-
-  @throws[HashingError]
-  private def assertHashTransaction(tx: Transaction.Transaction): Hash =
-    builder(Purpose.Transaction, aCid2String)
-      .addTransaction(tx)
-      .build
-
-  def hashTransaction(tx: Transaction.Transaction): Either[String, Hash] =
-    handleError(assertHashTransaction(tx))
 
   def deriveSubmissionSeed(
       nonce: Hash,

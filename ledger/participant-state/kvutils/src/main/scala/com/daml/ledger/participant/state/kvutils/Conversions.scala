@@ -6,7 +6,7 @@ package com.daml.ledger.participant.state.kvutils
 import java.time.{Duration, Instant}
 
 import com.daml.ledger.participant.state.kvutils.DamlKvutils._
-import com.daml.ledger.participant.state.v1.{PackageId, SubmittedTransaction, SubmitterInfo}
+import com.daml.ledger.participant.state.v1.{PackageId, SubmitterInfo}
 import com.digitalasset.daml.lf.crypto
 import com.digitalasset.daml.lf.data.Ref
 import com.digitalasset.daml.lf.data.Ref.{Identifier, LedgerString, Party}
@@ -172,13 +172,13 @@ private[state] object Conversions {
     Duration.ofSeconds(dur.getSeconds, dur.getNanos.toLong)
   }
 
-  def encodeTransaction(tx: SubmittedTransaction): TransactionOuterClass.Transaction = {
+  def encodeTransaction(tx: Transaction.AbsTransaction): TransactionOuterClass.Transaction = {
     TransactionCoder
       .encodeTransaction(TransactionCoder.NidEncoder, ValueCoder.CidEncoder, tx)
       .fold(err => throw Err.EncodeError("Transaction", err.errorMessage), identity)
   }
 
-  def decodeTransaction(tx: TransactionOuterClass.Transaction): SubmittedTransaction = {
+  def decodeTransaction(tx: TransactionOuterClass.Transaction): Transaction.AbsTransaction = {
     TransactionCoder
       .decodeVersionedTransaction(
         TransactionCoder.NidDecoder,

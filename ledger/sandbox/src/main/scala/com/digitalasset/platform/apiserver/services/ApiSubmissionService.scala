@@ -244,7 +244,7 @@ final class ApiSubmissionService private (
     } yield submissionResult
 
   private def handleResult(
-      res: scala.Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.AbsTransaction)]
+      res: scala.Either[ErrorCause, (SubmitterInfo, TransactionMeta, Transaction.Transaction)],
   ) =
     res match {
       case Right((submitterInfo, transactionMeta, transaction)) =>

@@ -229,10 +229,7 @@ final class Engine {
         commands = commands.map(_._2),
         time = ledgerEffectiveTime
       )
-      validationResult <- if (if (submissionSeed.isDefined)
-          crypto.Hash.hashTransaction(tx).exists(crypto.Hash.hashTransaction(rtx).contains(_))
-        else
-          tx isReplayedBy rtx)
+      validationResult <- if (tx isReplayedBy rtx)
         ResultDone(())
       else
         ResultError(

@@ -13,7 +13,7 @@ import com.daml.ledger.participant.state.v1._
 import com.digitalasset.daml.lf.crypto
 import com.digitalasset.daml.lf.data.Time.Timestamp
 import com.digitalasset.daml.lf.data.{ImmArray, InsertOrdSet, Ref}
-import com.digitalasset.daml.lf.transaction.GenTransaction
+import com.digitalasset.daml.lf.transaction.{GenTransaction, Transaction}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -81,7 +81,7 @@ class KeyValueParticipantStateWriterSpec extends WordSpec with MockitoSugar {
 
   private val aParty = Ref.Party.assertFromString("aParty")
 
-  private val anEmptyTransaction: SubmittedTransaction =
+  private val anEmptyTransaction: Transaction.AbsTransaction =
     GenTransaction(HashMap.empty, ImmArray.empty, Some(InsertOrdSet.empty))
 
   private val aSubmissionId: SubmissionId =

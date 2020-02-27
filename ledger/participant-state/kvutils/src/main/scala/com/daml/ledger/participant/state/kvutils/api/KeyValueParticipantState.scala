@@ -31,7 +31,8 @@ class KeyValueParticipantState(reader: LedgerReader, writer: LedgerWriter)(
   override def submitTransaction(
       submitterInfo: SubmitterInfo,
       transactionMeta: TransactionMeta,
-      transaction: SubmittedTransaction): CompletionStage[SubmissionResult] =
+      transaction: SubmittedTransaction,
+  ): CompletionStage[SubmissionResult] =
     writerAdapter.submitTransaction(submitterInfo, transactionMeta, transaction)
 
   override def submitConfiguration(

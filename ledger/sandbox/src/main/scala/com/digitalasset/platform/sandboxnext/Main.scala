@@ -4,11 +4,12 @@
 package com.digitalasset.platform.sandboxnext
 
 import com.digitalasset.platform.sandbox.cli.Cli
+import com.digitalasset.platform.sandbox.config.SandboxConfig
 import com.digitalasset.resources.ProgramResource
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val config = Cli.parse(args).getOrElse(sys.exit(1))
+    val config = Cli.parse(args, SandboxConfig.nextDefault).getOrElse(sys.exit(1))
     new ProgramResource(new Runner().owner(config)).run()
   }
 }

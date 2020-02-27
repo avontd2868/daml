@@ -233,6 +233,8 @@ object Cli {
     }.getOrElse(false)
   }
 
-  def parse(args: Array[String]): Option[SandboxConfig] =
-    cmdArgParser.parse(args, SandboxConfig.default)
+  def parse(
+      args: Array[String],
+      default: SandboxConfig = SandboxConfig.default): Option[SandboxConfig] =
+    cmdArgParser.parse(args, default)
 }
