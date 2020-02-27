@@ -82,15 +82,22 @@ trait FieldValidations {
   def requirePresence[T](option: Option[T], fieldName: String): Either[StatusRuntimeException, T] =
     option.fold[Either[StatusRuntimeException, T]](Left(missingField(fieldName)))(Right(_))
 
-  def requirePositiveDuration(
+  def validateTtl(
       durationO: Option[com.google.protobuf.duration.Duration],
-      fieldName: String): Either[StatusRuntimeException, Option[Duration]] =
-    durationO.fold[Either[StatusRuntimeException, Option[Duration]]](Right(None))(
-      duration =>
-        if (duration.seconds > 0 | duration.nanos > 0)
-          Right(Some(Duration.ofSeconds(duration.seconds, duration.nanos.toLong)))
-        else
-          Left(invalidField(fieldName, "Duration must be positive")))
+      maxTtl: Duration,
+      fieldName: String): Either[StatusRuntimeException, Duration] = durationO match {
+    case None =>
+      Right(maxTtl)
+    case Some(duration) =>
+      val result = Duration.ofSeconds(duration.seconds, duration.nanos.toLong)
+      if (result.isNegative)
+        Left(invalidField(fieldName, "Duration must be positive"))
+      else if (result.compareTo(maxTtl) > 0)
+        Left(
+          invalidField(fieldName, s"The given TTL of $result exceeds the maximum TTL of $maxTtl"))
+      else
+        Right(result)
+  }
 
   def validateIdentifier(identifier: Identifier): Either[StatusRuntimeException, Ref.Identifier] =
     for {

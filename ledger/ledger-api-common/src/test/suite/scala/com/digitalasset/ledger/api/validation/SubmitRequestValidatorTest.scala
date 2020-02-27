@@ -202,6 +202,38 @@ class SubmitRequestValidatorTest
           "Missing field: maximum_record_time"
         )
       }
+
+      "not allow negative ttl" in {
+        requestMustFailWith(
+          commandsValidator.validateCommands(
+            api.commands.copy(ttl = Some(Duration.of(-1, 0))),
+            internal.submittedAt,
+            internal.maxTtl),
+          INVALID_ARGUMENT,
+          "Invalid field ttl: Duration must be positive"
+        )
+      }
+
+      "not allow ttl exceeding maxTtl" in {
+        val manySeconds = 100000L
+        requestMustFailWith(
+          commandsValidator.validateCommands(
+            api.commands.copy(ttl = Some(Duration.of(manySeconds, 0))),
+            internal.submittedAt,
+            internal.maxTtl),
+          INVALID_ARGUMENT,
+          s"Invalid field ttl: The given TTL of ${java.time.Duration
+            .ofSeconds(manySeconds)} exceeds the maximum TTL of ${internal.maxTtl}"
+        )
+      }
+
+      "default to maxTtl if ttl is missing" in {
+        commandsValidator.validateCommands(
+          api.commands.copy(ttl = None),
+          internal.submittedAt,
+          internal.maxTtl) shouldEqual Right(
+          internal.emptyCommands.copy(ttl = internal.submittedAt.plus(internal.maxTtl)))
+      }
     }
 
     "validating contractId values" should {
