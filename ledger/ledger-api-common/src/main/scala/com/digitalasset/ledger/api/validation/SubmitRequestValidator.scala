@@ -15,8 +15,8 @@ class SubmitRequestValidator(commandsValidator: CommandsValidator) {
 
   def validate(
       req: SubmitRequest,
-      currentTime: => Instant,
-      maxTtl: => Duration): Either[StatusRuntimeException, submission.SubmitRequest] =
+      currentTime: Instant,
+      maxTtl: Duration): Either[StatusRuntimeException, submission.SubmitRequest] =
     for {
       commands <- requirePresence(req.commands, "commands")
       validatedCommands <- commandsValidator.validateCommands(commands, currentTime, maxTtl)
