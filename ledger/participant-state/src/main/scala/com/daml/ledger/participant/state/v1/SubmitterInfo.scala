@@ -27,10 +27,11 @@ import com.digitalasset.daml.lf.data.Time.Timestamp
   *   by DAML applications to deduce from the record time reported by the
   *   ledger whether a change that they submitted has been lost in transit.
   *
-  * @param ttl: the time until which the command should be deduplicated.
-  *   Command deduplication is already performed by the participant.
-  *   The ledger may choose to perform additional (cross-participant)
-  *   command deduplication. If it chooses to do so, it must follow the
+  * @param deduplicateUntil: the time until which the command should be
+  *   deduplicated. Command deduplication is already performed by the
+  *   participant. The ledger may choose to perform additional
+  *   (cross-participant) command deduplication.
+  *   If it chooses to do so, it must follow the
   *   same rules as the participant:
   *   - Deduplication is based on the (submitter, commandId) tuple.
   *   - Commands must not be deduplicated after the TTL has passed.
@@ -41,5 +42,5 @@ final case class SubmitterInfo(
     applicationId: ApplicationId,
     commandId: CommandId,
     maxRecordTime: Timestamp, //TODO: this should be a regular Instant
-    ttl: Instant
+    deduplicateUntil: Instant,
 )

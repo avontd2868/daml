@@ -275,7 +275,7 @@ object domain {
       ledgerEffectiveTime: Instant,
       maximumRecordTime: Instant,
       submittedAt: Instant,
-      ttl: Instant,
+      deduplicateUntil: Instant,
       commands: LfCommands)
 
   /**

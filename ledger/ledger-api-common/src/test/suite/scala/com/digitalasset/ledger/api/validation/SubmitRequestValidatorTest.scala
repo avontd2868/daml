@@ -86,7 +86,7 @@ class SubmitRequestValidatorTest
       let,
       mrt,
       submittedAt = submittedAt,
-      ttl = ttl,
+      deduplicateUntil = ttl,
       LfCommands(
         DomainMocks.party,
         ImmArray(
@@ -232,7 +232,8 @@ class SubmitRequestValidatorTest
           api.commands.copy(ttl = None),
           internal.submittedAt,
           internal.maxTtl) shouldEqual Right(
-          internal.emptyCommands.copy(ttl = internal.submittedAt.plus(internal.maxTtl)))
+          internal.emptyCommands.copy(
+            deduplicateUntil = internal.submittedAt.plus(internal.maxTtl)))
       }
     }
 

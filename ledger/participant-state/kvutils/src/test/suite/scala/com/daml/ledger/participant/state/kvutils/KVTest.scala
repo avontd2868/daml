@@ -208,7 +208,7 @@ object KVTest {
         applicationId = Ref.LedgerString.assertFromString("test"),
         commandId = commandId,
         maxRecordTime = testState.recordTime.addMicros(mrtDelta.toNanos / 1000),
-        ttl = testState.recordTime.addMicros(ttlDelta.toNanos / 1000).toInstant,
+        deduplicateUntil = testState.recordTime.addMicros(ttlDelta.toNanos / 1000).toInstant,
       )
       subm = KeyValueSubmission.transactionToSubmission(
         submitterInfo = submInfo,

@@ -688,7 +688,7 @@ abstract class ParticipantStateIntegrationSpecBase(implementationName: String)
       applicationId = Ref.LedgerString.assertFromString("tests"),
       commandId = Ref.LedgerString.assertFromString(commandId),
       maxRecordTime = inTheFuture(10.seconds),
-      ttl = inTheFuture(10.seconds).toInstant,
+      deduplicateUntil = inTheFuture(10.seconds).toInstant,
     )
 
   private def theOffset(first: Long, rest: Long*): Offset =

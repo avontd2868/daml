@@ -130,7 +130,7 @@ final class ApiSubmissionService private (
       implicit logCtx: LoggingContext): Future[Unit] = {
     val deduplicationKey = commands.submitter + "%" + commands.commandId.unwrap
     val submittedAt = commands.submittedAt
-    val ttl = commands.ttl
+    val ttl = commands.deduplicateUntil
 
     submissionService.deduplicateCommand(deduplicationKey, submittedAt, ttl).flatMap {
       case CommandDeduplicationNew =>

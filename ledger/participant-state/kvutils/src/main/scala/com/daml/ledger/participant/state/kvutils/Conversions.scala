@@ -179,7 +179,7 @@ private[state] object Conversions {
       applicationId = LedgerString.assertFromString(subInfo.getApplicationId),
       commandId = LedgerString.assertFromString(subInfo.getCommandId),
       maxRecordTime = parseTimestamp(subInfo.getMaximumRecordTime),
-      ttl = parseTimestamp(subInfo.getTtl).toInstant,
+      deduplicateUntil = parseTimestamp(subInfo.getDeduplicateUntil).toInstant,
     )
 
   def buildTimestamp(ts: Time.Timestamp): com.google.protobuf.Timestamp = {
