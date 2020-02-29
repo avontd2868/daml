@@ -137,9 +137,9 @@ class BaseLedger(val ledgerId: LedgerId, headAtInitialization: Long, ledgerDao: 
 
   override def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       result: CommandSubmissionResult): Future[Unit] =
-    ledgerDao.updateCommandResult(deduplicationKey, submittedAt, result.code, result.message)
+    ledgerDao.updateCommandResult(deduplicationKey, updatedAt, result.code, result.message)
 
   override def close(): Unit = {
     dispatcher.close()

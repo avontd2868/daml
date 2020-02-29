@@ -140,19 +140,19 @@ final class ApiSubmissionService private (
             case Success(_) =>
               submissionService.updateCommandResult(
                 deduplicationKey,
-                submittedAt,
+                Instant.now,
                 CommandSubmissionResult(Status.OK.getCode.value(), None))
             case Failure(GrpcException(status, _)) =>
               submissionService
                 .updateCommandResult(
                   deduplicationKey,
-                  submittedAt,
+                  Instant.now,
                   CommandSubmissionResult(status.getCode.value(), Option(status.getDescription)))
             case Failure(error) =>
               submissionService
                 .updateCommandResult(
                   deduplicationKey,
-                  submittedAt,
+                  Instant.now,
                   CommandSubmissionResult(Status.INTERNAL.getCode.value(), Some(error.getMessage)))
           }
       case CommandDeduplicationDuplicate(firstSubmittedAt) =>

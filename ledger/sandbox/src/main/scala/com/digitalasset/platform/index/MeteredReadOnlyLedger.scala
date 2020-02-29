@@ -120,11 +120,11 @@ class MeteredReadOnlyLedger(ledger: ReadOnlyLedger, metrics: MetricRegistry)
 
   override def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       result: CommandSubmissionResult): Future[Unit] =
     timedFuture(
       Metrics.updateCommandResult,
-      ledger.updateCommandResult(deduplicationKey, submittedAt, result))
+      ledger.updateCommandResult(deduplicationKey, updatedAt, result))
 }
 
 object MeteredReadOnlyLedger {

@@ -306,7 +306,7 @@ abstract class LedgerBackedIndexService(
 
   override def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       result: CommandSubmissionResult): Future[Unit] =
-    ledger.updateCommandResult(deduplicationKey: String, submittedAt, result)
+    ledger.updateCommandResult(deduplicationKey: String, updatedAt, result)
 }

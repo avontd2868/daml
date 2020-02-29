@@ -1689,19 +1689,19 @@ private class JdbcLedgerDao(
     """
       |update participant_command_submissions
       |set status_code={statusCode}, status_message={statusMessage}
-      |where deduplication_key={deduplicationKey} and submitted_at={submittedAt}
+      |where deduplication_key={deduplicationKey} and ttl>{updatedAt}
     """.stripMargin)
 
   override def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       code: Int,
       message: Option[String]): Future[Unit] =
     dbDispatcher.executeSql("update_command_result") { implicit conn =>
       SQL_UPDATE_COMMAND
         .on(
           "deduplicationKey" -> deduplicationKey,
-          "submittedAt" -> submittedAt,
+          "updatedAt" -> updatedAt,
           "statusCode" -> code,
           "statusMessage" -> message
         )

@@ -156,7 +156,7 @@ trait LedgerReadDao extends ReportsHealth {
   /** Sets the result of a command, so that duplicate submissions can return the original result */
   def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       code: Int,
       message: Option[String]): Future[Unit]
 }

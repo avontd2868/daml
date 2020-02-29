@@ -408,10 +408,10 @@ class InMemoryLedger(
 
   override def updateCommandResult(
       deduplicationKey: String,
-      submittedAt: Instant,
+      updatedAt: Instant,
       result: CommandSubmissionResult): Future[Unit] =
     Future.successful(this.synchronized {
-      for (cde <- commands.get(deduplicationKey) if cde.submittedAt == submittedAt) {
+      for (cde <- commands.get(deduplicationKey) if cde.ttl.isAfter(updatedAt)) {
         commands.update(deduplicationKey, cde.copy(result = Some(result)))
       }
     })
