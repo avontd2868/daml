@@ -22,7 +22,7 @@ final case class Configuration(
 object Configuration {
   import com.daml.ledger.participant.state.protobuf
 
-  val protobufVersion: Long = 1L
+  val protobufVersion: Long = 2L
 
   def decode(bytes: Array[Byte]): Either[String, Configuration] =
     Try(protobuf.LedgerConfiguration.parseFrom(bytes)).toEither.left
@@ -44,11 +44,17 @@ object Configuration {
           decodeTimeModel(config.getTimeModel)
         else
           Left("Missing time model")
+        maxTtl <- if (config.hasMaxCommandTtl)
+          Right(parseDuration(config.getMaxCommandTtl))
+        else if (config.getVersion > 1)
+          Left("Missing maximum command time to live")
+        else
+          Right(Duration.ofDays(1))
       } yield {
         Configuration(
           generation = config.getGeneration,
           timeModel = tm,
-          maxCommandTtl = parseDuration(config.getMaxCommandTtl),
+          maxCommandTtl = maxTtl,
         )
       }
 
