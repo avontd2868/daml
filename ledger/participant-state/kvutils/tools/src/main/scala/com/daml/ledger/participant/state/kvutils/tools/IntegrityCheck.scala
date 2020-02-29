@@ -52,7 +52,7 @@ object IntegrityCheck extends App {
   val defaultConfig = Configuration(
     generation = 0,
     timeModel = TimeModel.reasonableDefault,
-    maxCommandTtl = Duration.ofDays(1L),
+    maxCommandTtl = Duration.ofDays(1),
   )
   var state = Map.empty[Proto.DamlStateKey, Proto.DamlStateValue]
 

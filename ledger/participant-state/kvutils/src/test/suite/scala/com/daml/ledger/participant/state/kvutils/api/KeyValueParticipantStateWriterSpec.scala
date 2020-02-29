@@ -87,7 +87,7 @@ class KeyValueParticipantStateWriterSpec extends WordSpec with MockitoSugar {
     Ref.LedgerString.assertFromString(UUID.randomUUID().toString)
 
   private val aConfiguration: Configuration =
-    Configuration(1, TimeModel.reasonableDefault, Duration.ofDays(1L))
+    Configuration(1, timeModel = TimeModel.reasonableDefault, maxCommandTtl = Duration.ofDays(1))
 
   private def createWriter(captor: Option[ArgumentCaptor[Array[Byte]]] = None): LedgerWriter = {
     val writer = mock[LedgerWriter]

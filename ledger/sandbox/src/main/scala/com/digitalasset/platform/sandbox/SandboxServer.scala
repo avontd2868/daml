@@ -225,7 +225,7 @@ final class SandboxServer(
     implicit val executionContext: ExecutionContext = materializer.executionContext
 
     val defaultConfiguration =
-      ParticipantState.Configuration(0, config.timeModel, Duration.ofDays(1L))
+      ParticipantState.Configuration(0, config.timeModel, Duration.ofDays(1))
 
     val (acs, ledgerEntries, mbLedgerTime) = createInitialState(config, packageStore)
 

@@ -25,6 +25,6 @@ object LedgerReader {
   val DefaultConfiguration = Configuration(
     generation = 0,
     timeModel = TimeModel.reasonableDefault,
-    maxCommandTtl = Duration.ofDays(1L)
+    maxCommandTtl = Duration.ofDays(1)
   )
 }

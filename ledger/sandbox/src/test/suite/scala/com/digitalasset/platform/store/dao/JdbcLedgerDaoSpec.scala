@@ -267,7 +267,7 @@ class JdbcLedgerDaoSpec
     val defaultConfig = Configuration(
       generation = 0,
       timeModel = TimeModel.reasonableDefault,
-      Duration.ofDays(1L)
+      maxCommandTtl = Duration.ofDays(1),
     )
 
     "be able to persist and load configuration" in {
